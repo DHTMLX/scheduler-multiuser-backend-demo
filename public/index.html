@@ -1,0 +1,81 @@
+<!doctype html>
+
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>DHTMLX Scheduler Multi-User Backend</title>
+	<script src="https://cdn.dhtmlx.com/scheduler/edge/dhtmlxscheduler.js"
+		charset="utf-8"></script>
+	<link rel="stylesheet"
+		href="https://cdn.dhtmlx.com/scheduler/edge/dhtmlxscheduler.css"
+		type="text/css" charset="utf-8">
+	<style>
+		html,
+		body {
+			margin: 0px;
+			padding: 0px;
+			height: 100%;
+			overflow: hidden;
+		}
+	</style>
+
+	<script>
+		window.addEventListener("DOMContentLoaded", function () {
+			scheduler.plugins({
+				recurring: true,
+				quick_info: true
+			});
+
+
+			const AUTH_TOKEN = "token";
+			const api = `/`;
+			scheduler.init('scheduler_here', new Date(2025, 3, 20), "week");
+			fetch(`${api}events`, {
+				method: 'GET',
+				headers: {
+					'Remote-Token': AUTH_TOKEN,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then(response => {
+				return response.json();
+			})
+			.then(data => {
+				scheduler.parse(data);
+			})
+			.catch(error => {
+				console.error('There was a problem with the fetch request:', error);
+			});
+
+			const dp = scheduler.createDataProcessor({
+				url: `${api}events`,
+				mode: "REST-JSON",
+				headers: {
+					"Remote-Token": AUTH_TOKEN
+				}
+			});
+
+			const { RemoteEvents, remoteUpdates } = scheduler.ext.liveUpdates;
+			const remoteEvents = new RemoteEvents(`${api}api/v1`, AUTH_TOKEN);
+			remoteEvents.on(remoteUpdates);
+		});
+	</script>
+</head>
+
+<body>
+	<div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'>
+		<div class="dhx_cal_navline">
+			<div class="dhx_cal_prev_button"></div>
+			<div class="dhx_cal_next_button"></div>
+			<div class="dhx_cal_today_button"></div>
+			<div class="dhx_cal_date"></div>
+			<div class="dhx_cal_tab" data-tab="day"></div>
+			<div class="dhx_cal_tab" data-tab="week"></div>
+			<div class="dhx_cal_tab" data-tab="month"></div>
+		</div>
+
+		<div class="dhx_cal_header">
+		</div>
+		<div class="dhx_cal_data">
+		</div>
+	</div>
+	</div>
